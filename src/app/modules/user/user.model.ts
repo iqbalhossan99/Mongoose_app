@@ -1,7 +1,7 @@
-import { Model, Schema, model } from "mongoose";
-import { IUser, IUserMethods } from "./user.interface";
+import { Schema, model } from "mongoose";
+import { IUser, IUserMethods, UserModel } from "./user.interface";
 
-type UserModel = Model<IUser, {}, IUserMethods>;
+// type UserModel = Model<IUser, {}, IUserMethods>;
 
 export const userSchema = new Schema<IUser, UserModel, IUserMethods>({
     id: {
@@ -12,7 +12,7 @@ export const userSchema = new Schema<IUser, UserModel, IUserMethods>({
     role: {
         type: String,
         require: true,
-        enum: ["student"]
+        enum: ["student", "admin"]
     },
     password: {
         type: String,
@@ -56,8 +56,15 @@ export const userSchema = new Schema<IUser, UserModel, IUserMethods>({
 
 });
 
+// methods
 userSchema.method("fullName", function fullName() {
     return this.name.firstName + " " + this.name.lastName;
+})
+
+// statics
+userSchema.static("getAdminUsers", async function getAdminUsers() {
+    const admins = await this.find({ role: "admin" });
+    return admins;
 })
 
 export const User = model<IUser, UserModel>("User", userSchema);
